@@ -11,7 +11,10 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   display: "swap",
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://best-connect-business-group.avarainternational.workers.dev";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: "Best Connect Business Group — Technology Connects. Management Empowers. Growth Defines Us.",
     template: "%s | Best Connect Business Group",
@@ -30,17 +33,26 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://bestconnect.group",
+    url: siteUrl,
     siteName: "Best Connect Business Group",
     title: "Best Connect Business Group — Technology Connects. Management Empowers. Growth Defines Us.",
     description:
       "Managing, empowering, and growing six diverse businesses through centralized operations, innovative technology, and strategic leadership.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Best Connect Business Group",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Best Connect Business Group",
+    title: "Best Connect Business Group — Technology Connects. Management Empowers. Growth Defines Us.",
     description:
-      "Technology-driven business management group empowering six diverse ventures across Myanmar and Thailand.",
+      "Managing, empowering, and growing six diverse businesses through centralized operations, innovative technology, and strategic leadership.",
+    images: ["/og-image.png"],
   },
   icons: {
     icon: [
