@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Best Connect Business Group
 
-## Getting Started
+> **Technology Connects. Management Empowers. Growth Defines Us.**
 
-First, run the development server:
+The official corporate web portal for **Best Connect Business Group**, an executive management and technology holding company empowering six diverse ventures across Myanmar and Thailand.
+
+---
+
+## 🏢 Business Portfolio
+
+1. **Dtwo Business Group** (`/businesses#dtwo`) — Retail & E-Commerce (physical outlets, liquor stores, and regional delivery network).
+2. **Infinity Water** (`/businesses#infinity-water`) — Purified Water & Wellness (pure bottled water production and companion wellness tracking mobile app).
+3. **Aldora Hill Boutique Resort** (`/businesses#aldora-hill`) — Luxury Hospitality (exclusive private villas in the pine-covered highlands of Kalaw, Shan State).
+4. **Sein Shwe Pyae Sone** (`/businesses#sein-shwe`) — Fine Gems & Luxury Jewelry (curated high-carat gold and gemological artistry).
+5. **Avara International** (`/businesses#avara`) — Cross-Border Trading, Logistics & Capital (regional supply chain and freight forwarding headquartered in Bangkok).
+6. **International Hospital Service Myanmar (IHSM)** (`/businesses#ihsm`) — Healthcare Services (modern clinical operations and medical talent management).
+
+---
+
+## 🚀 Technology Stack
+
+- **Framework**: Next.js 16 (App Router with Turbopack)
+- **Styling**: Tailwind CSS v4 & custom CSS design tokens
+- **Animations**: Canvas 2D Stripe Ribbon Wave, Framer Motion, and CSS GPU-accelerated Marquee
+- **Typography**: Plus Jakarta Sans (Google Fonts)
+- **Deployment**: Optimized for Cloudflare Workers / Cloudflare Pages
+
+---
+
+## 🛠️ Development & Building
 
 ```bash
+# Install dependencies
+npm install
+
+# Start local development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Run ESLint validation
+npm run lint
+
+# Production build
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🌐 Cloudflare Deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is pre-configured and optimized to run on Cloudflare Workers / Cloudflare Pages.
+All pages are fully pre-rendered as static content (`prerendered as static content`) for instant edge delivery.
