@@ -3,15 +3,23 @@
 import { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { businesses, type Business } from "@/data/businesses";
 
-function BusinessCard({ biz }: { biz: Business }) {
+function BusinessCard({
+  biz,
+  onCardClick,
+}: {
+  biz: Business;
+  onCardClick: (e: React.MouseEvent, href: string) => void;
+}) {
   return (
     <div className="w-[280px] sm:w-[320px] md:w-[340px] shrink-0 select-none">
       <Link
         href={biz.href}
-        className="block group/card h-full select-none"
+        onClick={(e) => onCardClick(e, biz.href)}
+        className="block group/card h-full select-none cursor-pointer"
         draggable={false}
       >
         <div className="relative h-full bg-white rounded-2xl border border-bc-dark/[0.06] overflow-hidden transition-all duration-300 hover:border-bc-blue/25 hover:shadow-xl hover:shadow-bc-blue/[0.08] hover:-translate-y-1">
@@ -96,6 +104,7 @@ function BusinessCard({ biz }: { biz: Business }) {
 }
 
 export default function BusinessCarousel() {
+  const router = useRouter();
   const trackWrapperRef = useRef<HTMLDivElement>(null);
   const firstTrackRef = useRef<HTMLDivElement>(null);
 
@@ -103,11 +112,16 @@ export default function BusinessCarousel() {
   const xRef = useRef(0);
   const singleSetWidthRef = useRef(0);
 
-  // Drag / swipe gesture state refs
+  // Gesture state refs
+  const isPressedRef = useRef(false);
   const isDraggingRef = useRef(false);
+  const justSwipedRef = useRef(false);
   const dragStartXRef = useRef(0);
+  const dragStartYRef = useRef(0);
   const dragCurrentXRef = useRef(0);
-  const hasDraggedRef = useRef(false);
+
+  // Hover state (pauses auto-glide on desktop hover)
+  const isHoveredRef = useRef(false);
 
   // Velocity tracking for flick/momentum
   const lastTimeRef = useRef(0);
@@ -124,7 +138,6 @@ export default function BusinessCarousel() {
   useEffect(() => {
     const updateDimensions = () => {
       if (firstTrackRef.current) {
-        // Track width + gap-6 (24px)
         singleSetWidthRef.current = firstTrackRef.current.offsetWidth + 24;
       }
     };
@@ -142,9 +155,11 @@ export default function BusinessCarousel() {
       const dt = Math.min((now - prevTime) / 1000, 0.1);
       prevTime = now;
 
-      // Auto-move only when not actively dragging, not coasting momentum, and not in the 1.5s post-swipe wait
+      // Auto-move only when not actively pressed/dragging, not hovered on desktop, not coasting momentum, and not in the 1.5s post-swipe wait
       if (
+        !isPressedRef.current &&
         !isDraggingRef.current &&
+        !isHoveredRef.current &&
         !isWaitingResumeRef.current &&
         momentumRafRef.current === null
       ) {
@@ -197,7 +212,7 @@ export default function BusinessCarousel() {
   const handlePointerDown = (e: React.PointerEvent) => {
     if (e.button !== 0 && e.pointerType === "mouse") return;
 
-    // Cancel any active momentum or resume timer immediately
+    // Cancel active momentum or resume timer immediately
     if (momentumRafRef.current) {
       cancelAnimationFrame(momentumRafRef.current);
       momentumRafRef.current = null;
@@ -207,102 +222,131 @@ export default function BusinessCarousel() {
       resumeTimerRef.current = null;
     }
 
-    isDraggingRef.current = true;
-    isWaitingResumeRef.current = true;
+    isPressedRef.current = true;
+    isDraggingRef.current = false;
     dragStartXRef.current = e.clientX;
+    dragStartYRef.current = e.clientY;
     dragCurrentXRef.current = xRef.current;
-    hasDraggedRef.current = false;
 
-    lastTimeRef.current = performance.now();
+    lastTimeRef.current = e.timeStamp;
     lastXRef.current = e.clientX;
     velocityRef.current = 0;
 
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    window.addEventListener("pointermove", handleWindowPointerMove);
+    window.addEventListener("pointerup", handleWindowPointerUp);
+    window.addEventListener("pointercancel", handleWindowPointerUp);
   };
 
-  // Pointer / Touch move
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDraggingRef.current) return;
+  const handleWindowPointerMove = (e: PointerEvent) => {
+    if (!isPressedRef.current) return;
 
-    const now = performance.now();
-    const dt = now - lastTimeRef.current;
-    if (dt > 0) {
-      const v = (e.clientX - lastXRef.current) / dt;
-      velocityRef.current = velocityRef.current * 0.3 + v * 0.7;
-      lastTimeRef.current = now;
-      lastXRef.current = e.clientX;
+    const deltaX = e.clientX - dragStartXRef.current;
+    const deltaY = e.clientY - dragStartYRef.current;
+
+    // Detect if the user is vertically scrolling the page on mobile
+    if (!isDraggingRef.current) {
+      if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 8) {
+        // Vertical page scroll: release carousel tracking
+        isPressedRef.current = false;
+        cleanupListeners();
+        return;
+      }
+      if (Math.abs(deltaX) > 8) {
+        // Horizontal swipe confirmed
+        isDraggingRef.current = true;
+      }
     }
 
-    const delta = e.clientX - dragStartXRef.current;
-    if (Math.abs(delta) > 5) {
-      hasDraggedRef.current = true;
-    }
+    if (isDraggingRef.current) {
+      const now = e.timeStamp;
+      const dt = (now - lastTimeRef.current) / 1000;
+      if (dt > 0) {
+        const v = (e.clientX - lastXRef.current) / dt;
+        velocityRef.current = velocityRef.current * 0.3 + v * 0.7;
+        lastTimeRef.current = now;
+        lastXRef.current = e.clientX;
+      }
 
-    const W = singleSetWidthRef.current;
-    if (W > 0) {
-      let newX = dragCurrentXRef.current + delta;
-      while (newX <= -W) newX += W;
-      while (newX > 0) newX -= W;
-      xRef.current = newX;
+      const W = singleSetWidthRef.current;
+      if (W > 0) {
+        let newX = dragCurrentXRef.current + deltaX;
+        while (newX <= -W) newX += W;
+        while (newX > 0) newX -= W;
+        xRef.current = newX;
 
-      if (trackWrapperRef.current) {
-        trackWrapperRef.current.style.transform = `translate3d(${newX}px, 0, 0)`;
+        if (trackWrapperRef.current) {
+          trackWrapperRef.current.style.transform = `translate3d(${newX}px, 0, 0)`;
+        }
       }
     }
   };
 
-  // Pointer / Touch up or cancel
-  const handlePointerUp = (e: React.PointerEvent) => {
-    if (!isDraggingRef.current) return;
-    isDraggingRef.current = false;
+  const cleanupListeners = () => {
+    window.removeEventListener("pointermove", handleWindowPointerMove);
+    window.removeEventListener("pointerup", handleWindowPointerUp);
+    window.removeEventListener("pointercancel", handleWindowPointerUp);
+  };
 
-    try {
-      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-    } catch {
-      // Ignored
-    }
+  const handleWindowPointerUp = () => {
+    if (!isPressedRef.current) return;
+    isPressedRef.current = false;
+    cleanupListeners();
 
-    // If swiped with velocity, coast smoothly with momentum before waiting 1.5s
-    const v = velocityRef.current;
-    if (hasDraggedRef.current && Math.abs(v) > 0.2) {
-      let currentVelocity = Math.max(Math.min(v * 15, 30), -30);
-      const W = singleSetWidthRef.current;
+    if (isDraggingRef.current) {
+      // Swiped: mark justSwiped to prevent accidental click propagation on swipe release
+      justSwipedRef.current = true;
+      setTimeout(() => {
+        justSwipedRef.current = false;
+        isDraggingRef.current = false;
+      }, 150);
 
-      const runMomentum = () => {
-        currentVelocity *= 0.90; // Natural deceleration
-        xRef.current += currentVelocity;
+      // If swiped with velocity, coast smoothly with momentum before waiting 1.5s
+      const v = velocityRef.current;
+      if (Math.abs(v) > 0.2) {
+        let currentVelocity = Math.max(Math.min(v * 15, 30), -30);
+        const W = singleSetWidthRef.current;
 
-        if (W > 0) {
-          while (xRef.current <= -W) xRef.current += W;
-          while (xRef.current > 0) xRef.current -= W;
-        }
+        const runMomentum = () => {
+          currentVelocity *= 0.90; // Natural deceleration
+          xRef.current += currentVelocity;
 
-        if (trackWrapperRef.current) {
-          trackWrapperRef.current.style.transform = `translate3d(${xRef.current}px, 0, 0)`;
-        }
+          if (W > 0) {
+            while (xRef.current <= -W) xRef.current += W;
+            while (xRef.current > 0) xRef.current -= W;
+          }
 
-        if (Math.abs(currentVelocity) > 0.5) {
-          momentumRafRef.current = requestAnimationFrame(runMomentum);
-        } else {
-          momentumRafRef.current = null;
-          startResumeCountdown();
-        }
-      };
+          if (trackWrapperRef.current) {
+            trackWrapperRef.current.style.transform = `translate3d(${xRef.current}px, 0, 0)`;
+          }
 
-      momentumRafRef.current = requestAnimationFrame(runMomentum);
+          if (Math.abs(currentVelocity) > 0.5) {
+            momentumRafRef.current = requestAnimationFrame(runMomentum);
+          } else {
+            momentumRafRef.current = null;
+            startResumeCountdown();
+          }
+        };
+
+        momentumRafRef.current = requestAnimationFrame(runMomentum);
+      } else {
+        // Direct release without flick: pause for exactly 1.5 seconds immediately
+        startResumeCountdown();
+      }
     } else {
-      // Direct release without flick: pause for exactly 1.5 seconds immediately
+      // Clean tap or click without dragging: start normal resume countdown
       startResumeCountdown();
     }
   };
 
-  // Prevent link navigation if the pointer moved/swiped
-  const handleClickCapture = (e: React.MouseEvent) => {
-    if (hasDraggedRef.current) {
+  // Card click handler: navigates cleanly to the business section on click/tap
+  const handleCardClick = (e: React.MouseEvent, href: string) => {
+    if (isDraggingRef.current || justSwipedRef.current) {
       e.preventDefault();
       e.stopPropagation();
-      hasDraggedRef.current = false;
+      return;
     }
+    e.preventDefault();
+    router.push(href);
   };
 
   return (
@@ -326,12 +370,14 @@ export default function BusinessCarousel() {
 
       {/* Infinite Moving Swipable Carousel Track */}
       <div
-        className="relative w-full overflow-hidden py-2 cursor-grab active:cursor-grabbing select-none touch-pan-y"
+        className="relative w-full overflow-hidden py-2 select-none touch-pan-y"
         onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
-        onClickCapture={handleClickCapture}
+        onMouseEnter={() => {
+          isHoveredRef.current = true;
+        }}
+        onMouseLeave={() => {
+          isHoveredRef.current = false;
+        }}
       >
         {/* Left edge blur fade */}
         <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-12 sm:w-28 bg-gradient-to-r from-white via-white/80 to-transparent z-20" />
@@ -354,7 +400,11 @@ export default function BusinessCarousel() {
               aria-hidden={trackIdx > 0}
             >
               {businesses.map((biz) => (
-                <BusinessCard key={`${trackIdx}-${biz.id}`} biz={biz} />
+                <BusinessCard
+                  key={`${trackIdx}-${biz.id}`}
+                  biz={biz}
+                  onCardClick={handleCardClick}
+                />
               ))}
             </div>
           ))}
