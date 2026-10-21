@@ -52,13 +52,16 @@ export default function Hero() {
 
       {/* Content */}
       <div className="relative z-10 mx-auto max-w-[1400px] w-full px-5 sm:px-6 lg:px-10">
-        <div className="max-w-3xl xl:max-w-4xl">
+        <div className="relative max-w-3xl xl:max-w-4xl">
+          {/* Subtle mobile backdrop feathering ensuring 100% typography legibility over animated ribbon */}
+          <div className="absolute -inset-x-4 -inset-y-6 bg-gradient-to-r from-white via-white/80 to-transparent rounded-3xl -z-10 pointer-events-none lg:hidden" />
+
           {/* Eyebrow */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-[11px] sm:text-xs font-semibold tracking-[0.2em] uppercase text-bc-gray-dark mb-5 sm:mb-6"
+            className="text-[11px] sm:text-xs font-bold tracking-[0.2em] uppercase text-bc-dark/75 mb-5 sm:mb-6"
           >
             A Group of Businesses. A Stronger Tomorrow.
           </motion.p>
@@ -72,7 +75,7 @@ export default function Hero() {
           >
             <span className="text-bc-blue block whitespace-nowrap">Technology Connects.</span>
             <span className="text-bc-dark block whitespace-nowrap">Management Empowers.</span>
-            <span className="text-bc-green block whitespace-nowrap">Growth Defines Us.</span>
+            <span className="text-bc-green block whitespace-nowrap drop-shadow-[0_1px_4px_rgba(255,255,255,0.85)]">Growth Defines Us.</span>
           </motion.h1>
 
           {/* Supporting description — Plus Jakarta Sans Regular 400 */}

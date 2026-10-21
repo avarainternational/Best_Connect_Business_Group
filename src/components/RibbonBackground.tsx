@@ -129,33 +129,33 @@ export default function RibbonBackground({ endY }: RibbonBackgroundProps) {
       const fineJitter = Math.cos(s * 70 - t * 0.55) * (isMobile ? 0.6 : 1.2);
 
       // --- Point 0: Top Entry ---
-      const p0Start = isMobile ? 0.26 : 0.30;
-      const p0End   = isMobile ? 1.42 : 0.98;
+      const p0Start = isMobile ? 0.44 : 0.30;
+      const p0End   = isMobile ? 1.36 : 0.98;
       const p0Spread = (p0End - p0Start) * (1 + 0.12 * Math.sin(t * 0.45));
       const p0Center = lerp(p0Start, p0End, 0.5);
-      const p0x = width * (p0Center + (Math.pow(s, 0.88) - 0.5) * p0Spread) + wave1 * (isMobile ? 20 : 40) + microRipple;
+      const p0x = width * (p0Center + (Math.pow(s, 0.88) - 0.5) * p0Spread) + wave1 * (isMobile ? 16 : 40) + microRipple;
       const p0y = -60 - s * 35;
 
       // --- Point 1: Volumetric Upper Swell (billowing crest) ---
-      const p1Start = isMobile ? 0.32 : 0.34;
-      const p1End   = isMobile ? 1.52 : 1.06;
+      const p1Start = isMobile ? 0.48 : 0.34;
+      const p1End   = isMobile ? 1.42 : 1.06;
       const p1Spread = (p1End - p1Start) * volumeSwell;
       const p1Center = lerp(p1Start, p1End, 0.5) + twist * (isMobile ? 0.03 : 0.05);
-      const p1x = width * (p1Center + (Math.pow(s, 0.72) - 0.5) * p1Spread) + wave2 * (isMobile ? 38 : 72) + mx * (1 - s * 0.28) + fineJitter;
+      const p1x = width * (p1Center + (Math.pow(s, 0.72) - 0.5) * p1Spread) + wave2 * (isMobile ? 32 : 72) + mx * (1 - s * 0.28) + fineJitter;
       const p1y = targetHeight * lerp(isMobile ? 0.44 : 0.50, isMobile ? 0.14 : 0.16, s) + wave1 * (isMobile ? 24 : 50) + crestBreath * (isMobile ? 16 : 32) + my;
 
       // --- Point 2: Deep 3D Mid Fold & Cinch ---
-      const p2Start = isMobile ? 0.54 : 0.66;
-      const p2End   = isMobile ? 1.46 : 1.02;
+      const p2Start = isMobile ? 0.62 : 0.66;
+      const p2End   = isMobile ? 1.38 : 1.02;
       const p2Spread = (p2End - p2Start) * pinchFactor;
       const p2Center = lerp(p2Start, p2End, 0.5) + wave1 * (isMobile ? 0.03 : 0.06);
       const foldFactor = Math.sin(s * Math.PI);
-      const p2x = width * (p2Center + (s - 0.5) * p2Spread) + twist * (isMobile ? 42 : 78) + foldFactor * (isMobile ? 40 : 72) + mx * 0.65;
+      const p2x = width * (p2Center + (s - 0.5) * p2Spread) + twist * (isMobile ? 36 : 78) + foldFactor * (isMobile ? 36 : 72) + mx * 0.65;
       const p2y = targetHeight * lerp(isMobile ? 0.70 : 0.74, isMobile ? 0.42 : 0.48, s) + wave2 * (isMobile ? 28 : 54) - crestBreath * (isMobile ? 14 : 26) - my * 0.45;
 
       // --- Point 3: Bottom Cascade Exit ---
-      const p3Start = isMobile ? 1.34 : 0.98;
-      const p3End   = isMobile ? 1.00 : 0.84;
+      const p3Start = isMobile ? 1.28 : 0.98;
+      const p3End   = isMobile ? 0.96 : 0.84;
       const bottomTwist = Math.sin(s * Math.PI * 1.2 + t * 0.4) * 0.07;
       const p3x = width * (lerp(p3Start, p3End, s) + bottomTwist) + wave1 * (isMobile ? 16 : 30);
       // Ends right at the bottom baseline of "How We Operate"
@@ -177,13 +177,13 @@ export default function RibbonBackground({ endY }: RibbonBackgroundProps) {
         const s = i / (count - 1);
         const wave = Math.sin(t * 0.55 + s * 4.2) * (isMobile ? 22 : 38);
 
-        const p0x = width * lerp(isMobile ? 0.65 : 0.70, isMobile ? 1.30 : 0.97, s);
+        const p0x = width * lerp(isMobile ? 0.75 : 0.70, isMobile ? 1.30 : 0.97, s);
         const p0y = -35;
-        const p1x = width * lerp(isMobile ? 0.88 : 0.94, isMobile ? 1.40 : 1.06, s) + wave + mouse.x * (isMobile ? 16 : 34);
+        const p1x = width * lerp(isMobile ? 0.94 : 0.94, isMobile ? 1.40 : 1.06, s) + wave + mouse.x * (isMobile ? 16 : 34);
         const p1y = targetHeight * lerp(0.24, 0.42, s) + Math.cos(t * 0.50 + s * 2.8) * (isMobile ? 14 : 24);
-        const p2x = width * lerp(isMobile ? 0.80 : 0.85, isMobile ? 1.35 : 0.99, s) - wave * 0.8;
+        const p2x = width * lerp(isMobile ? 0.88 : 0.85, isMobile ? 1.35 : 0.99, s) - wave * 0.8;
         const p2y = targetHeight * lerp(0.60, 0.78, s);
-        const p3x = width * lerp(isMobile ? 0.80 : 0.85, isMobile ? 1.35 : 0.99, 1 - s);
+        const p3x = width * lerp(isMobile ? 0.88 : 0.85, isMobile ? 1.35 : 0.99, 1 - s);
         const p3y = targetHeight * (isMobile ? 1.00 : 1.08);
 
         ctx!.beginPath();
@@ -213,13 +213,13 @@ export default function RibbonBackground({ endY }: RibbonBackgroundProps) {
         const u = i / (rimCount - 1);
         const wave = Math.sin(t * 0.50 + u * 2.6) * (isMobile ? 12 : 22);
 
-        const rx0 = width * lerp(isMobile ? 0.86 : 0.80, isMobile ? 1.30 : 0.91, u);
+        const rx0 = width * lerp(isMobile ? 0.90 : 0.80, isMobile ? 1.30 : 0.91, u);
         const ry0 = -30;
-        const rx1 = width * lerp(isMobile ? 0.96 : 0.89, isMobile ? 1.42 : 0.99, u) + wave;
+        const rx1 = width * lerp(isMobile ? 0.98 : 0.89, isMobile ? 1.42 : 0.99, u) + wave;
         const ry1 = targetHeight * 0.26;
-        const rx2 = width * lerp(isMobile ? 0.94 : 0.90, isMobile ? 1.38 : 0.97, u) - wave * 0.7;
+        const rx2 = width * lerp(isMobile ? 0.96 : 0.90, isMobile ? 1.38 : 0.97, u) - wave * 0.7;
         const ry2 = targetHeight * 0.64;
-        const rx3 = width * lerp(isMobile ? 0.88 : 0.86, isMobile ? 1.32 : 0.95, u);
+        const rx3 = width * lerp(isMobile ? 0.92 : 0.86, isMobile ? 1.32 : 0.95, u);
         const ry3 = targetHeight * (isMobile ? 1.00 : 1.08);
 
         ctx!.beginPath();
